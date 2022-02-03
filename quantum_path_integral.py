@@ -184,9 +184,14 @@ def update(f):
         for i in range(num_of_points):
             if cnt != 0:
                 # w = mx**2/2ht
+                # Reference
+                # THE QUANTUM UNIVERSE
+                # (and why anything that can happen, does)
+                # by Brian Cox and Jeff Forshaw
                 m_per_2h = mass / (2 * h) * 10 ** (power_mass - power_h)
                 w = m_per_2h * np.abs(x - x[i]) ** 2 / (cnt * delta_t)
                 ph = (phase0 + 2. * np.pi * w) % (2. * np.pi)
+                # Superpose the vectors of each points
                 yy = amp0 * np.sin(ph) / num_of_points
                 zz = amp0 * np.cos(ph) / num_of_points
                 y1[i] = np.sum(yy)
@@ -195,6 +200,7 @@ def update(f):
         phase1 = np.arctan2(y1, z1)
         update_curve_phi1()
         prob1 = amp1 ** 2.
+        # Calibrate probability
         prob_cal = np.sum(prob1)
         if prob_cal != 0:
             prob1 = amp1 ** 2 / prob_cal
