@@ -364,7 +364,7 @@ var_dt = tk.StringVar(root)  # variable for spinbox-value
 var_dt.set(delta_t_init)  # Initial value
 spn_dt = tk.Spinbox(
     root, textvariable=var_dt, format="%.1f", from_=1, to=10000., increment=10.,
-    command=lambda: change_dt(float(var_scale.get())), width=8
+    command=lambda: change_dt(float(var_dt.get())), width=8
     )
 spn_dt.pack(side='left')
 
