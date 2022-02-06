@@ -177,6 +177,15 @@ def change_yz_scale(sc):
     update_additional_lines()
 
 
+def change_function():
+    global function_number
+    function_number = var_function.get()
+    if function_number == 0:
+        ax1.set_title('Quantum Mechanics, Path integral w = mx**2/2ht')
+    else:
+        ax1.set_title('Quantum Mechanics, Path integral w = x/t')
+
+
 def switch():
     global is_play
     if is_play:
@@ -193,14 +202,18 @@ def update(f):
         z1 = x * 0.
         for i in range(num_of_points):
             if (cnt * delta_t) != 0:
-                # w = mx**2/2ht
-                # Reference
-                # THE QUANTUM UNIVERSE
-                # (and why anything that can happen, does)
-                # by Brian Cox and Jeff Forshaw
-                m_per_2h = mass / (2 * h) * 10 ** (power_mass - power_h)
-                w = m_per_2h * np.abs(x - x[i]) ** 2 / (cnt * delta_t)
-                ph = (phase0 + 2. * np.pi * w) % (2. * np.pi)
+                if function_number == 0:
+                    # w = mx**2/2ht
+                    # Reference
+                    # THE QUANTUM UNIVERSE
+                    # (and why anything that can happen, does)
+                    # by Brian Cox and Jeff Forshaw
+                    m_per_2h = mass / (2 * h) * 10 ** (power_mass - power_h)
+                    w = m_per_2h * np.abs(x - x[i]) ** 2 / (cnt * delta_t)
+                    ph = (phase0 + 2. * np.pi * w) % (2. * np.pi)
+                else:
+                    w = np.abs(x - x[i]) / (cnt * delta_t)
+                    ph = (phase0 + 2. * np.pi * w) % (2. * np.pi)
                 # Superpose the vectors of each points
                 yy = amp0 * np.sin(ph) / num_of_points
                 zz = amp0 * np.cos(ph) / num_of_points
@@ -255,6 +268,8 @@ delta_t_power_init = 3.
 delta_t_power = delta_t_power_init
 delta_x_init = delta_t_base_init * 10 ** delta_t_power
 delta_t = delta_x_init
+
+function_number = 0
 
 # Generate figure and axes
 fig = Figure()
@@ -353,7 +368,7 @@ var_dx = tk.StringVar(root)  # variable for spinbox-value
 var_dx.set(delta_x_init)  # Initial value
 spn_dx = tk.Spinbox(
     frm1, textvariable=var_dx, format="%.2f", from_=0.0, to=10.0, increment=0.01,
-    command=lambda: change_dx(float(var_dx.get())), width=4
+    command=lambda: change_dx(float(var_dx.get())), width=5
     )
 spn_dx.pack(side='left')
 
@@ -392,6 +407,14 @@ spn_dt_power = tk.Spinbox(
     command=lambda: change_dt_power(float(var_dt_power.get())), width=4
     )
 spn_dt_power.pack(side='left')
+
+frm4 = ttk.Labelframe(root, relief="ridge", text="Function", labelanchor="n", width=100)
+frm4.pack(side='left')
+var_function = tk.IntVar(value=0)
+rdb0_function = tk.Radiobutton(frm4, text="w=mx**2/2ht", command=change_function, variable=var_function, value=0)
+rdb1_function = tk.Radiobutton(frm4, text="w=x/t", command=change_function, variable=var_function, value=1)
+rdb0_function.pack(anchor=tk.W)
+rdb1_function.pack(anchor=tk.W)
 
 lbl_scale = tk.Label(root, text=", Scale of y,z")
 lbl_scale.pack(side='left')
