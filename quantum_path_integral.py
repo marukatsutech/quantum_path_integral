@@ -116,10 +116,20 @@ def switch_phase():
     update_curve_phi0()
 
 
-def change_dt(dt):
-    global is_play, delta_t
+def change_dt_power(dt_power):
+    global is_play, delta_t, delta_t_power
     reset_phi1_prob1()
-    delta_t = dt
+    delta_t_power = dt_power
+    delta_t = delta_t_base * 10 ** delta_t_power
+    tx_step.set_text("Step=" + str(cnt) + "(dt/step=" + str(delta_t) + ")")
+
+
+def change_dt_base(dt_base):
+    global is_play, delta_t, delta_t_base
+    reset_phi1_prob1()
+    delta_t_base = dt_base
+    delta_t = delta_t_base * 10 ** delta_t_power
+    tx_step.set_text("Step=" + str(cnt) + "(dt/step=" + str(delta_t) + ")")
 
 
 def change_dx(dx):
@@ -177,12 +187,12 @@ def switch():
 
 def update(f):
     global cnt, tx_step, phase1, amp1, prob1, curve_phi1, curve_prob1
-    tx_step.set_text("Step=" + str(cnt))
+    tx_step.set_text("Step=" + str(cnt) + "(dt/step=" + str(delta_t) + ")")
     if is_play:
         y1 = x * 0.
         z1 = x * 0.
         for i in range(num_of_points):
-            if cnt != 0:
+            if (cnt * delta_t) != 0:
                 # w = mx**2/2ht
                 # Reference
                 # THE QUANTUM UNIVERSE
@@ -239,8 +249,12 @@ power_mass = -31
 mass = mass_init
 h = 6.626   # Planck constant 6.626 * 10**-34 kg*m**2 / s
 power_h = -34
-delta_t_init = 1000.
-delta_t = delta_t_init
+delta_t_base_init = 1.
+delta_t_base = delta_t_base_init
+delta_t_power_init = 3.
+delta_t_power = delta_t_power_init
+delta_x_init = delta_t_base_init * 10 ** delta_t_power
+delta_t = delta_x_init
 
 # Generate figure and axes
 fig = Figure()
@@ -259,7 +273,7 @@ ax1.set_zlim(z_min * yz_scale, z_max * yz_scale)
 tx_step = ax1.text2D(x_min, y_max, "Step=" + str(0))
 xz, yz, _ = proj3d.proj_transform(x_min, y_max * yz_scale, z_max * yz_scale * 1.2, ax1.get_proj())
 tx_step.set_position((xz, yz))
-tx_num_pnt = ax1.text2D(x_min, y_max, "Number of points in delta x=" + str(num_of_points_in_delta_x))
+tx_num_pnt = ax1.text2D(x_min, y_max, "Number of points in dx=" + str(num_of_points_in_delta_x))
 xz, yz, _ = proj3d.proj_transform(x_min, y_max * yz_scale, z_max * yz_scale, ax1.get_proj())
 tx_num_pnt.set_position((xz, yz))
 tx_delta_x = ax1.text2D(position, 0., "dx=" + str(delta_x_init))
@@ -358,15 +372,26 @@ var_phase = tk.BooleanVar(root, value=False)
 chk_phase = tk.Checkbutton(frm2, text="Phase", variable=var_phase, command=switch_phase)
 chk_phase.pack(side='left')
 
-lbl_dt = tk.Label(root, text="dt per step")
-lbl_dt.pack(side='left')
-var_dt = tk.StringVar(root)  # variable for spinbox-value
-var_dt.set(delta_t_init)  # Initial value
-spn_dt = tk.Spinbox(
-    root, textvariable=var_dt, format="%.1f", from_=1, to=10000., increment=10.,
-    command=lambda: change_dt(float(var_dt.get())), width=8
+frm3 = ttk.Labelframe(root, relief="ridge", text="dt per step", labelanchor="n", width=100)
+frm3.pack(side='left')
+lbl_dt_base = tk.Label(frm3, text="Base")
+lbl_dt_base.pack(side='left')
+var_dt_base = tk.StringVar(root)  # variable for spinbox-value
+var_dt_base.set(delta_t_base_init)  # Initial value
+spn_dt_base = tk.Spinbox(
+    frm3, textvariable=var_dt_base, format="%.1f", from_=0.1, to=10., increment=0.1,
+    command=lambda: change_dt_base(float(var_dt_base.get())), width=4
     )
-spn_dt.pack(side='left')
+spn_dt_base.pack(side='left')
+lbl_dt_power = tk.Label(frm3, text=", Power")
+lbl_dt_power.pack(side='left')
+var_dt_power = tk.StringVar(root)  # variable for spinbox-value
+var_dt_power.set(delta_t_power_init)  # Initial value
+spn_dt_power = tk.Spinbox(
+    frm3, textvariable=var_dt_power, format="%.1f", from_=-6, to=6, increment=1.,
+    command=lambda: change_dt_power(float(var_dt_power.get())), width=4
+    )
+spn_dt_power.pack(side='left')
 
 lbl_scale = tk.Label(root, text=", Scale of y,z")
 lbl_scale.pack(side='left')
